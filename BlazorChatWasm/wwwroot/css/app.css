@@ -9,6 +9,11 @@ h1:focus {
 a, .btn-link {
     color: #0071c1;
 }
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Adjust spacing */
+}
 
 .btn-primary {
     color: #fff;
