@@ -34,19 +34,22 @@ namespace BlazorChatWasm.Services
             var user = new ClaimsPrincipal(new ClaimsIdentity()); // not authenticated user
             try
             {
-                var response = await httpClient.GetAsync("manage/info");
+                var response = await httpClient.GetAsync("api/account/profile");
                 if (response.IsSuccessStatusCode)
                 {
                     var strResponse = await response.Content.ReadAsStringAsync();
                     var jsonResponse = JsonNode.Parse(strResponse);
+                    var id = jsonResponse?["id"]?.ToString();
+                    var userName = jsonResponse?["userName"]?.ToString();
                     var email = jsonResponse?["email"]?.ToString();
                     var claims = new List<Claim> {
-                        new Claim(ClaimTypes.Name, email),
+                        new Claim(ClaimTypes.NameIdentifier,id),
+                        new Claim(ClaimTypes.Name, userName),
                         new Claim(ClaimTypes.Email, email)
                     };
                     var identity = new ClaimsIdentity(claims, "Token");
                     user = new ClaimsPrincipal(identity);
-                    return new AuthenticationState(user);
+                    return new AuthenticationState(user);   
                 }
             }
             catch { }

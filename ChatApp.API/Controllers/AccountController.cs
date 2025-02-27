@@ -37,12 +37,7 @@ namespace ChatApp.API.Controllers
                 return BadRequest();
             }
            
-            return Ok(new ApplicationUser
-            {
-                Id = currentUser.Id,
-                UserName = currentUser.UserName,
-                Email = currentUser.Email
-            });
+            return Ok(currentUser);
         }
     }
 }

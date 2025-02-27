@@ -31,7 +31,7 @@
                                 </div>
                             </div>
                             <div>
-                                <p class="mb-0">@user.Email</p>
+                                <p class="mb-0">@user.UserName</p>
 
                             </div>
                         </div>
@@ -103,6 +103,9 @@
     [Parameter] public string CurrentMessage { get; set; }
     [Parameter] public string CurrentUserId { get; set; }
     [Parameter] public string CurrentUserEmail { get; set; }
+    public List<ApplicationUser> ChatUsers = new List<ApplicationUser>();
+    [Parameter] public string ContactEmail { get; set; }
+    [Parameter] public string ContactId { get; set; }
     private List<ChatMessage> messages = new List<ChatMessage>();
     private async Task SubmitAsync()
     {
@@ -110,14 +113,16 @@
         {
             var chatHistory = new ChatMessage()
                 {
+                    FromUserId = CurrentUserId,
                     Message = CurrentMessage,
                     ToUserId = ContactId,
                     CreatedDate = DateTime.Now
                 };
             await chatService.SaveMessageAsync(chatHistory);
-            chatHistory.FromUserId = CurrentUserId;
-            await hubConnection.SendAsync("SendMessageAsync", chatHistory, CurrentUserEmail);
             CurrentMessage = string.Empty;
+            StateHasChanged();
+            await hubConnection.SendAsync("SendMessageAsync", chatHistory, CurrentUserEmail);
+
         }
     }
     protected override async Task OnInitializedAsync()
@@ -140,29 +145,27 @@
 
                 if ((ContactId == message.ToUserId && CurrentUserId == message.FromUserId))
                 {
-                    messages.Add(new ChatMessage { Message = message.Message, CreatedDate = message.CreatedDate, FromUser = new ApplicationUser() { Email = CurrentUserEmail } });
+                    messages.Add(new ChatMessage { Message = message.Message, CreatedDate = message.CreatedDate, FromUser = new ApplicationUser() {Id=CurrentUserId, Email = CurrentUserEmail },FromUserId = CurrentUserId });
                     await hubConnection.SendAsync("ChatNotificationAsync", $"New Message From {userName}", ContactId, CurrentUserId);
                 }
                 else if ((ContactId == message.FromUserId && CurrentUserId == message.ToUserId))
                 {
-                    messages.Add(new ChatMessage { Message = message.Message, CreatedDate = message.CreatedDate, FromUser = new ApplicationUser() { Email = ContactEmail } });
+                    messages.Add(new ChatMessage { Message = message.Message, CreatedDate = message.CreatedDate, FromUser = new ApplicationUser() {Id =ContactId, Email = ContactEmail } ,FromUserId = ContactId});
                 }
-                StateHasChanged();
+                await InvokeAsync(StateHasChanged);
             }
         });
         await GetUsersAsync();
         var state = await AuthProvider.GetAuthenticationStateAsync();
         var user = state.User;
-        CurrentUserId = user.Claims.Where(a => a.Type == "sub").Select(a => a.Value).FirstOrDefault();
-        CurrentUserEmail = user.Claims.Where(a => a.Type == "name").Select(a => a.Value).FirstOrDefault();
+        CurrentUserId = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        CurrentUserEmail = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
         if (!string.IsNullOrEmpty(ContactId))
         {
             await LoadUserChatAsync(ContactId);
         }
     }
-    public List<ApplicationUser> ChatUsers = new List<ApplicationUser>();
-    [Parameter] public string ContactEmail { get; set; }
-    [Parameter] public string ContactId { get; set; }
+    
     async Task LoadUserChatAsync(string userId)
     {
         var contact = await chatService.GetUserDetailsAsync(userId);
@@ -175,5 +178,11 @@
     private async Task GetUsersAsync()
     {
         ChatUsers = await chatService.GetUsersAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeAsync<string>("ScrollToBottom", "chatContainer");
+        
     }
 }

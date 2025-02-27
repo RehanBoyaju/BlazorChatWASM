@@ -69,7 +69,7 @@
                     var permission = await JS.InvokeAsync<string>("Notification.requestPermission");
                     if (permission == "granted")
                     {
-                        await JS.InvokeVoidAsync("eval", $"new Notification('{message}')");
+                        await JS.InvokeVoidAsync("alert",$"new message from{receiverUserId}");
                     }
             }
         });
