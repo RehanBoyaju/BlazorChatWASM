@@ -61,7 +61,7 @@ namespace BlazorChatWasm.Services
         {
             try
             {
-                var response = await httpClient.PostAsJsonAsync("https://localhost:7002/login", loginModel);
+                var response = await httpClient.PostAsJsonAsync("login", loginModel);
                 if (response.IsSuccessStatusCode)
                 {
                     var strResponse = await response.Content.ReadAsStringAsync();
@@ -93,7 +93,7 @@ namespace BlazorChatWasm.Services
         {
             try
             {
-                var response = await httpClient.PostAsJsonAsync("https://localhost:7002/register", registerModel);
+                var response = await httpClient.PostAsJsonAsync("register", registerModel);
                 if (response.IsSuccessStatusCode)
                 {
                     return await LoginAsync(new LoginModel { Email = registerModel.Email, Password = registerModel.Password });
@@ -112,7 +112,19 @@ namespace BlazorChatWasm.Services
 
             return new FormResult { Succeeded = false, Errors = new string[] { "Connection Error" } };
         }
-       
+        //public async Task<byte[]> GetProfileImage(string userId)
+        //{
+        //    var response = await httpClient.GetAsync($"api/account/{userId}/profileimage");
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        return await response.Content.ReadAsByteArrayAsync();
+        //    }
+
+        //    return null;
+
+
+        //}
+
         public void Logout()
         {
             localStorage.RemoveItem("accessToken");

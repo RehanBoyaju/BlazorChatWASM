@@ -5,7 +5,7 @@
 namespace ChatApp.API.Migrations
 {
     /// <inheritdoc />
-    public partial class fixedApplicationUser : Migration
+    public partial class addeddefaultpfp : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

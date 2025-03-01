@@ -1,76 +1,81 @@
-﻿@page "/chat"
-@page "/chat/{ContactId}"
-@using Microsoft.AspNetCore.SignalR
-@using Microsoft.AspNetCore.SignalR.Client
-@using System.Security.Claims
+﻿    @page "/chat"
+    @page "/chat/{ContactId}"
+    @using Microsoft.AspNetCore.SignalR
+    @using Microsoft.AspNetCore.SignalR.Client
+    @using System.Security.Claims
 @attribute [Authorize]
-<h3>Chat</h3>
-<AuthorizeView>
-    <Authorized>
-        Hello @context.User.Identity?.Name
-    </Authorized>
-    <NotAuthorized>
-        You are not authorized
-    </NotAuthorized>
-</AuthorizeView>
+    <h3>Chat</h3>
+    <AuthorizeView>
+        <Authorized>
+            Hello @context.User.Identity?.Name
+        </Authorized>
+        <NotAuthorized>
+            You are not authorized
+        </NotAuthorized>
+    </AuthorizeView>
 
 
-<div class="d-flex flex-grow-1 flex-row">
-    <div class="d-flex flex-column px-4" style="max-height:90vh;min-height:90vh; overflow:auto;">
-        <ul class="list-group">
-            Online Users:
-            @foreach (var user in ChatUsers)
+    <div class="d-flex flex-grow-1 flex-row">
+        <div class="d-flex flex-column px-4" style="max-height:90vh;min-height:90vh; overflow:auto;">
+            <ul class="list-group">
+                Online Users:
+                @if (ChatUsers != null)
             {
-                @if (user.Id != ContactId)
+                @foreach (var user in ChatUsers)
                 {
-                    <li class="list-group-item d-flex justify-content-between align-items-center mt-4" @onclick="() => LoadUserChatAsync(user.Id)">
-                        <div class="d-flex">
-                            <div class="mr-4 ">
-                                <div class="avatar" style="height: 50px; width: 50px; background-color: #555; color: white; display: flex; justify-content: center; align-items: center; border-radius: 50%;">
-                                    @user.Email.ToUpper().FirstOrDefault()
+                    @if (user.Id != ContactId)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center mt-4" @onclick="() => LoadUserChatAsync(user.Id)">
+                            <div class="d-flex">
+                                <div class="mr-4 ">
+                                    <div class="avatar" style="height: 50px; width: 50px; background-color: #555; color: white; display: flex; justify-content: center; align-items: center; border-radius: 50%;">
+                                        <img src="@user.profileImageUrl" alt="pfp" height="50" width="50" />
+                                    </div>
                                 </div>
-                            </div>
-                            <div>
-                                <p class="mb-0">@user.UserName</p>
+                                <div>
+                                    <p class="mb-0">@user.UserName</p>
 
-                            </div>
-                        </div>
-                    </li>
-                }
-                else
-                {
-                    <li class="list-group-item d-flex justify-content-between align-items-center mt-4" style="background-color: #3f51b5" @onclick="() => LoadUserChatAsync(user.Id)">
-                        <div class="d-flex" style="background-color: #3f51b5">
-                            <div class="mr-4 ">
-                                <div class="avatar" style="height: 50px; width: 50px; background-color: lightblue; color: white; display: flex; justify-content: center; align-items: center; border-radius: 50%;">
-                                    @user.Email.ToUpper().FirstOrDefault()
                                 </div>
                             </div>
-                            <div>
-                                <p class="mb-0">@user.Email</p>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center mt-4" style="background-color:#d3d3d3; transform: scale(0.95)" @onclick="() => LoadUserChatAsync(user.Id)">
+                            <div class="d-flex">
+                                <div class="mr-4 ">
+                                    <div class="avatar" style="height: 50px; width: 50px; background-color: #1976d2; color: white; display: flex; justify-content: center; align-items: center; border-radius: 50%;">
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="mb-0">@user.Email</p>
+                                </div>
                             </div>
-                        </div>
-                    </li>
+                        </li>
+                    }
                 }
             }
         </ul>
     </div>
-    <div class="d-flex flex-column px-4" style="max-height:70vh;min-height:70vh;">
-        <div style="max-height:60vh;min-height:60vh; overflow:scroll;" id="chatContainer">
+    <div class="d-flex flex-column px-4 flex-grow-1" style="max-height:70vh;min-height:70vh;">
+        <div style="max-height:60vh;min-height:60vh; overflow-y:scroll;" id="chatContainer">
             @foreach (var msg in messages)
             {
                 if (msg.FromUserId == CurrentUserId)
                 {
-                    <div class="d-flex flex-row my-4" style="background-color: #3f51b5">
+                    <div class="d-flex flex-row m-2" style=" justify-content: flex-end;">
                         <div class="mr-4">
                             <div class="avatar" style="height: 50px; width: 50px; background-color: #3f51b5; color: white; display: flex; justify-content: center; align-items: center; border-radius: 50%;">
+
                                 @msg.FromUser.Email.ToUpper().FirstOrDefault()
                             </div>
                         </div>
                         <div>
                             <p class="mb-0">You</p>
                             <small class="text-muted" style="font-size: xx-small;">@msg.CreatedDate.ToString("dd MMM, yyyy hh:mm tt")</small>
-                            <p class="mt-2" style="padding: 15px; background-color: #f4f4f4; border-radius: 5px;">@msg.Message</p>
+
+                            <p class="mt-2" style="padding: 15px; background-color: #1976d2 ; border-radius: 5px;">@msg.Message</p>
+
                         </div>
                     </div>
                 }
@@ -78,7 +83,7 @@
                 {
                     <div class="d-flex flex-row my-4">
                         <div class="mr-4">
-                            <div class="avatar" style="height: 50px; width: 50px; background-color: #3f51b5; color: white; display: flex; justify-content: center; align-items: center; border-radius: 50%;">
+                            <div class="avatar" style="height: 50px; width: 50px; background-color: #555; color: white; display: flex; justify-content: center; align-items: center; border-radius: 50%;">
                                 @msg.FromUser.Email.ToUpper().FirstOrDefault()
                             </div>
                         </div>
@@ -91,9 +96,9 @@
                 }
             }
         </div>
-        <div class="d-flex flex-row px-2 mx-4">
-            <InputText Placeholder="Enter Your Message..." class="mt-n2 mx-4" @bind-Value="CurrentMessage" />
-            <button type="submit" class="btn btn-primary" @onclick="SubmitAsync">Send</button>
+        <div class="d-flex flex-row px-2 mx-4 mt-2">
+            <InputText Placeholder="Enter Your Message..." class="mt-n2 mx-4 flex-grow-1" @bind-Value="CurrentMessage" @oninput="OnInputChanged"  @onkeydown="HandleKeyDown"/>
+            <button type="submit" class="btn btn-primary" @onclick="() => SubmitAsync(CurrentMessage)">Send</button>
         </div>
     </div>
 </div>
@@ -107,17 +112,22 @@
     [Parameter] public string ContactEmail { get; set; }
     [Parameter] public string ContactId { get; set; }
     private List<ChatMessage> messages = new List<ChatMessage>();
-    private async Task SubmitAsync()
+    private async Task<string> GetProfile(string userId)
     {
-        if (!string.IsNullOrEmpty(CurrentMessage) && !string.IsNullOrEmpty(ContactId))
+        var image = await HttpClient.GetByteArrayAsync($"api/account/{userId}/profileimage");
+        return $"data:image/jpeg;base64,{Convert.ToBase64String(image)}";
+    }
+    private async Task SubmitAsync(string message)
+    {
+        if (!string.IsNullOrEmpty(message) && !string.IsNullOrEmpty(ContactId))
         {
             var chatHistory = new ChatMessage()
-                {
-                    FromUserId = CurrentUserId,
-                    Message = CurrentMessage,
-                    ToUserId = ContactId,
-                    CreatedDate = DateTime.Now
-                };
+                    {
+                        FromUserId = CurrentUserId,
+                        Message = message,
+                        ToUserId = ContactId,
+                        CreatedDate = DateTime.Now
+                    };
             await chatService.SaveMessageAsync(chatHistory);
             CurrentMessage = string.Empty;
             StateHasChanged();
@@ -165,7 +175,7 @@
             await LoadUserChatAsync(ContactId);
         }
     }
-    
+
     async Task LoadUserChatAsync(string userId)
     {
         var contact = await chatService.GetUserDetailsAsync(userId);
@@ -178,11 +188,32 @@
     private async Task GetUsersAsync()
     {
         ChatUsers = await chatService.GetUsersAsync();
-    }
+        foreach(var user in ChatUsers)
+        {
+            user.profileImageUrl = await GetProfile(user.Id);
+        }
+     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await JS.InvokeAsync<string>("ScrollToBottom", "chatContainer");
-        
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            await JS.InvokeAsync<string>("ScrollToBottom", "chatContainer");
+
+        }
+        private async Task HandleKeyDown(KeyboardEventArgs args)
+        {
+            if (args.Key == "Enter")
+            {
+                if (!string.IsNullOrEmpty(CurrentMessage))
+                {
+                    var messageToSend = CurrentMessage;  // Capture the message
+                    CurrentMessage = string.Empty;  // Clear input field immediately
+                    StateHasChanged();  // Update UI
+                    await SubmitAsync(messageToSend);  // Call the submit method
+                }
+            }
+        }
+        private void OnInputChanged(ChangeEventArgs args)
+        {
+            CurrentMessage = args.Value?.ToString();
+        }
     }
-}

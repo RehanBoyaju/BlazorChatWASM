@@ -40,6 +40,18 @@ a, .btn-link {
 .validation-message {
     color: red;
 }
+chatContainer::-webkit-scrollbar {
+    width: 2px; /* Makes the scrollbar thinner */
+}
+
+#chatContainer::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2); /* Slightly visible thumb */
+    border-radius: 10px; /* Round the edges of the thumb */
+}
+
+#chatContainer::-webkit-scrollbar-track {
+    background-color: transparent; /* Keep the track invisible */
+}
 
 #blazor-error-ui {
     color-scheme: light only;

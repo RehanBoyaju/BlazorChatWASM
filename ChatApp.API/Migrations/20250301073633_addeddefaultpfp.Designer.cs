@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatApp.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250226171148_intial")]
-    partial class intial
+    [Migration("20250301073633_addeddefaultpfp")]
+    partial class addeddefaultpfp
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -67,6 +67,10 @@ namespace ChatApp.API.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<byte[]>("ProfileImage")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -102,7 +106,6 @@ namespace ChatApp.API.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FromUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Message")
@@ -259,8 +262,7 @@ namespace ChatApp.API.Migrations
                 {
                     b.HasOne("ChatApp.API.Data.ApplicationUser", "FromUser")
                         .WithMany("ChatMessagesFromUsers")
-                        .HasForeignKey("FromUserId")
-                        .IsRequired();
+                        .HasForeignKey("FromUserId");
 
                     b.HasOne("ChatApp.API.Data.ApplicationUser", "ToUser")
                         .WithMany("ChatMessagesToUsers")

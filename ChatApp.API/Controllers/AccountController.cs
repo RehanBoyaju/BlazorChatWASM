@@ -12,19 +12,12 @@ namespace ChatApp.API.Controllers
     public class AccountController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly ApplicationDbContext _context;
 
-        public AccountController(UserManager<ApplicationUser> userManager)
+        public AccountController(UserManager<ApplicationUser> userManager,ApplicationDbContext context)
         {
             this.userManager = userManager;
-        }
-        [HttpGet]
-        public async Task<IActionResult> Hello()
-        {
-            if(User.Identity == null || !User.Identity.IsAuthenticated)
-            {
-                return Unauthorized("You are not authenticated");
-            }
-            return Ok("You are authenticated");
+            _context = context;
         }
 
         [Authorize]
@@ -38,6 +31,14 @@ namespace ChatApp.API.Controllers
             }
            
             return Ok(currentUser);
+        }
+
+        [Authorize]
+        [HttpGet("{userId}/ProfileImage")]
+        public async Task<IActionResult> ProfileImage(string userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            return File(user.ProfileImage, "image/jpeg");
         }
     }
 }

@@ -1,5 +1,6 @@
 using ChatApp.API.Data;
 using ChatApp.API.Hubs;
+using ChatApp.API.MinimalAPIs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -34,13 +35,12 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>().AddEntityFrameworkSt
 builder.Services.AddSignalR();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowBlazorClient", policy => policy
-    .WithOrigins("https://localhost:7296") // Replace with your Blazor WebAssembly URL
-    .AllowAnyMethod()
-    .AllowAnyHeader()
-    .AllowCredentials()); // This is needed for authentication
+    options.AddPolicy("AllowBlazor",
+        policy => policy.WithOrigins("https://localhost:44338") // Add your Blazor WebAssembly origin
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
 });
-
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -74,7 +74,7 @@ builder.Services.AddEndpointsApiExplorer();
 //});
 builder.Services.AddOpenApi();
 var app = builder.Build();
-
+ApplicationUser user = new ApplicationUser();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -85,12 +85,13 @@ if (app.Environment.IsDevelopment())
             c.SwaggerEndpoint("/openapi/v1.json","api");
         });
 }
+app.UseStaticFiles(); // Serve static files from wwwroot
 app.UseHttpsRedirection();
-app.UseRouting();
-app.UseCors("AllowBlazorClient");
+app.UseRouting(); 
+app.UseCors("AllowBlazor");
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapIdentityApi<ApplicationUser>();
+app.MapCustomIdentityApi<ApplicationUser>();
 app.MapControllers();
 app.MapHub<SignalRHub>("/signalRHub");
 app.MapFallbackToFile("index.html");

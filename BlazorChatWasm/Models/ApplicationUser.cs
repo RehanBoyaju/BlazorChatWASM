@@ -6,7 +6,9 @@ namespace BlazorChatWasm.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        
+        public string profileImageUrl { get; set; }
+        //public byte[] profileImage { get; set; } = Array.Empty<byte>();
+
         [JsonIgnore]
         public virtual ICollection<ChatMessage> ChatMessagesFromUsers { get; set; }
         [JsonIgnore]
@@ -15,6 +17,7 @@ namespace BlazorChatWasm.Models
         {
             ChatMessagesFromUsers = new HashSet<ChatMessage>();
             ChatMessagesToUsers = new HashSet<ChatMessage>();
+            //profileImageUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(profileImage)}";
         }
     }
 }
